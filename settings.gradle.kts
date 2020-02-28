@@ -1,3 +1,3 @@
 rootProject.name = "awesome-kotlin"
 
-include(Module.backend)
+include(":app-backend")

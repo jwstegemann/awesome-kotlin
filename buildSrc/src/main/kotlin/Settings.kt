@@ -1,7 +1,3 @@
-object Module {
-    const val backend = ":app-backend"
-}
-
 object Dep {
     const val kotlinVersion = "1.3.50"
 
