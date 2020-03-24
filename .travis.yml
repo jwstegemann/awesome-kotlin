@@ -25,17 +25,6 @@ before_deploy:
   - echo "-> Pushing image heapy/awesome:b${TRAVIS_BUILD_NUMBER} to docker hub"
   - docker push heapy/awesome
 
-deploy:
-  provider: pages
-  skip_cleanup: true
-  github_token: $GH_TOKEN
-  keep_history: true
-  local_dir: readme
-  target_branch: readme
-  committer_from_gh: true
-  on:
-    branch: master
-
 before_cache:
   - rm -f  "${HOME}/.gradle/caches/modules-2/modules-2.lock"
   - rm -rf "${HOME}/.gradle/caches/*/plugin-resolution/"
