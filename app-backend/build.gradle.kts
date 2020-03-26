@@ -1,7 +1,5 @@
-import Dep.Kotlin
-
 plugins {
-    kotlin("jvm").version(Dep.kotlinVersion)
+    kotlin("jvm").version("1.3.71")
     application
 }
 
@@ -16,33 +14,39 @@ repositories {
 }
 
 dependencies {
-    implementation(Kotlin.stdlib)
-    implementation(Kotlin.reflect)
-    implementation(Dep.coroutines)
+    implementation(kotlin("stdlib-jdk8"))
+    implementation(kotlin("reflect"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.5")
 
-    implementation(Dep.jacksonXml)
-    implementation(Dep.jacksonKotlin)
+    val jacksonVersion = "2.10.3"
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     implementation("io.github.config4k:config4k:0.4.1")
-    implementation("io.undertow:undertow-core:2.0.26.Final")
+    implementation("io.undertow:undertow-core:2.0.30.Final")
 
-    implementation("org.koin:koin-core-ext:2.0.1")
-    implementation("org.koin:koin-logger-slf4j:2.0.1")
+    val koinVersion = "2.1.1"
+    implementation("org.koin:koin-core-ext:$koinVersion")
+    implementation("org.koin:koin-logger-slf4j:$koinVersion")
 
-    implementation("org.slf4j:slf4j-api:1.7.25")
+    implementation("org.slf4j:slf4j-api:1.7.30")
     implementation("ch.qos.logback:logback-classic:1.2.3")
-    implementation("io.sentry:sentry-logback:1.6.3")
+    implementation("io.sentry:sentry-logback:1.7.30")
 
-    implementation("com.rometools:rome:1.7.0")
-    implementation("com.github.dfabulich:sitemapgen4j:1.0.6")
-    implementation("org.jsoup:jsoup:1.10.2")
+    implementation("com.rometools:rome:1.12.2")
+    implementation("com.github.dfabulich:sitemapgen4j:1.1.2")
+    implementation("org.jsoup:jsoup:1.13.1")
     implementation("by.heap.remark:remark-kotlin:1.2.0")
 
-    implementation(Dep.commonmark)
-    implementation(Dep.commonmarkExtGfmTables)
+    val commonmarkVersion = "0.14.0"
+    implementation("com.atlassian.commonmark:commonmark:$commonmarkVersion")
+    implementation("com.atlassian.commonmark:commonmark-ext-gfm-tables:$commonmarkVersion")
 
-    implementation(Dep.httpClient)
+    implementation("org.apache.httpcomponents:httpasyncclient:4.1.4")
 
-    testImplementation(Dep.mockk)
-    testImplementation(Dep.junit)
+    testImplementation("io.mockk:mockk:1.9.3")
+
+    val junitVersion = "5.6.1"
+    testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 }
