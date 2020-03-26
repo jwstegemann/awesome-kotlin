@@ -1,8 +1,12 @@
 package link.kotlin.backend.services
 
+import io.ktor.client.HttpClient
+import io.ktor.client.request.head
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode.Companion.NotFound
+import io.ktor.http.HttpStatusCode.Companion.OK
 import kotlinx.coroutines.withTimeoutOrNull
 import link.kotlin.backend.logger
-import org.apache.http.client.methods.HttpHead
 
 interface LinkChecker {
     suspend fun check(link: String): LinkStatus
@@ -14,23 +18,23 @@ internal class DefaultLinkChecker(
     override suspend fun check(link: String): LinkStatus {
         return try {
             withTimeoutOrNull(10000) {
-                httpClient.execute(HttpHead(link))
+                httpClient.head<HttpResponse>(link)
             }?.run {
-                when (statusLine.statusCode) {
-                    404 -> {
+                when (status) {
+                    NotFound -> {
                         LOGGER.error("NOT FOUND: $link")
                         LinkStatus.NOT_FOUND
                     }
-                    200 -> LinkStatus.OK
+                    OK -> LinkStatus.OK
                     else -> {
-                        LOGGER.error("${statusLine.statusCode}: $link")
-                        LinkStatus.ERROR
+                        LOGGER.error("${status}: $link")
+                        LinkStatus.ERROR("Http Status: $status")
                     }
                 }
             } ?: LinkStatus.TIMEOUT
         } catch (e: Exception) {
             LOGGER.error("Error checking link $link.", e)
-            LinkStatus.ERROR
+            LinkStatus.ERROR(e.message ?: "Unknown error")
         }
     }
 
@@ -39,9 +43,9 @@ internal class DefaultLinkChecker(
     }
 }
 
-enum class LinkStatus {
-    OK,
-    NOT_FOUND,
-    TIMEOUT,
-    ERROR
+sealed class LinkStatus {
+    object OK : LinkStatus()
+    object NOT_FOUND : LinkStatus()
+    object TIMEOUT : LinkStatus()
+    class ERROR(val message: String) : LinkStatus()
 }

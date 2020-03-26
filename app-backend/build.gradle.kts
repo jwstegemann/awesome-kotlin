@@ -42,7 +42,9 @@ dependencies {
     implementation("com.atlassian.commonmark:commonmark:$commonmarkVersion")
     implementation("com.atlassian.commonmark:commonmark-ext-gfm-tables:$commonmarkVersion")
 
-    implementation("org.apache.httpcomponents:httpasyncclient:4.1.4")
+    val ktorVersion = "1.3.1"
+    implementation("io.ktor:ktor-client-jackson:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache:$ktorVersion")
 
     testImplementation("io.mockk:mockk:1.9.3")
 

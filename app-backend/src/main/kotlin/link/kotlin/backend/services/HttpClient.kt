@@ -1,68 +1,28 @@
 package link.kotlin.backend.services
 
-import kotlinx.coroutines.CancellableContinuation
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.cancelFutureOnCancellation
-import kotlinx.coroutines.suspendCancellableCoroutine
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.apache.Apache
+import io.ktor.client.features.json.JacksonSerializer
+import io.ktor.client.features.json.JsonFeature
 import link.kotlin.backend.logger
-import org.apache.http.HttpResponse
-import org.apache.http.client.methods.HttpUriRequest
-import org.apache.http.concurrent.FutureCallback
-import org.apache.http.impl.nio.client.HttpAsyncClients
-import org.apache.http.nio.client.HttpAsyncClient
 import kotlin.concurrent.thread
 
-interface HttpClient {
-    suspend fun execute(request: HttpUriRequest): HttpResponse
-}
-
-fun HttpResponse.body(): String {
-    return entity.content.reader().readText()
-}
-
-private class DefaultHttpClient(
-    private val client: HttpAsyncClient
-) : HttpClient {
-    override suspend fun execute(request: HttpUriRequest): HttpResponse {
-        return client.execute(request)
-    }
-}
-
-private suspend fun HttpAsyncClient.execute(request: HttpUriRequest): HttpResponse {
-    return suspendCancellableCoroutine { cont: CancellableContinuation<HttpResponse> ->
-        val future = this.execute(request, object : FutureCallback<HttpResponse> {
-            override fun completed(result: HttpResponse) {
-                cont.resumeWith(Result.success(result))
-            }
-
-            override fun cancelled() {
-                if (cont.isCancelled) return
-                cont.resumeWith(Result.failure(CancellationException("Cancelled")))
-            }
-
-            override fun failed(ex: Exception) {
-                cont.resumeWith(Result.failure(ex))
-            }
-        })
-
-        cont.cancelFutureOnCancellation(future);
-        Unit
-    }
-}
-
 fun createHttpClient(): HttpClient {
-    val asyncClient = HttpAsyncClients.custom()
-        .setMaxConnPerRoute(1000)
-        .setMaxConnTotal(1000)
-        .build()
+    val asyncClient = HttpClient(Apache) {
+        install(JsonFeature) {
+            serializer = JacksonSerializer()
+        }
+    }
 
     Runtime.getRuntime().addShutdownHook(thread(start = false) {
         logger<HttpClient>().info("HttpClient Shutdown called...")
-        asyncClient.close()
-        logger<HttpClient>().info("HttpClient Shutdown done...")
+        try {
+            asyncClient.close()
+            logger<HttpClient>().info("HttpClient Shutdown done...")
+        } catch (e: Exception) {
+            logger<HttpClient>().info("HttpClient Shutdown exceptionally", e)
+        }
     })
 
-    asyncClient.start()
-
-    return DefaultHttpClient(client = asyncClient)
+    return asyncClient
 }

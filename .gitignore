@@ -12,3 +12,6 @@ out
 # Gradle
 .gradle
 build
+
+# Configuration
+application.conf

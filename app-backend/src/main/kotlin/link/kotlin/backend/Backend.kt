@@ -11,7 +11,7 @@ import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
 import io.undertow.Undertow
 import link.kotlin.backend.services.createHttpClient
-import org.koin.Logger.slf4jLogger
+import org.koin.logger.slf4jLogger
 import org.koin.core.KoinApplication
 import org.koin.dsl.module
 import kotlin.concurrent.thread
@@ -19,14 +19,14 @@ import kotlin.concurrent.thread
 fun main() {
     val mainModule = module {
         single { ObjectMapper().registerKotlinModule() }
-        single { XmlMapper().also { it.registerModule(KotlinModule()) } }
+        single { XmlMapper().also { it.registerKotlinModule() } }
         single { createHttpClient() }
         single { ConfigFactory.load().resolve() }
         single { get<Config>().extract<ApplicationConfiguration>() }
         single { createRootHandler() }
     }
 
-    val koin = KoinApplication.create().run {
+    val koin = KoinApplication.init().run {
         modules(mainModule)
         slf4jLogger()
         koin
