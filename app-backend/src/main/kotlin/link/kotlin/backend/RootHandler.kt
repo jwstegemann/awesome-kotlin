@@ -5,16 +5,16 @@ import io.undertow.server.RoutingHandler
 import io.undertow.server.handlers.PathHandler
 import io.undertow.server.handlers.resource.PathResourceManager
 import io.undertow.server.handlers.resource.ResourceHandler
+import link.kotlin.backend.handlers.DefaultCoroutinesHandler
+import link.kotlin.backend.handlers.VersionHandler
 import java.nio.file.Paths
 
-fun createRootHandler(): HttpHandler {
+fun createRootHandler(versionHandler: VersionHandler): HttpHandler {
     val apiRouting = RoutingHandler()
         .get("/readme") {
             TODO("README.adoc")
         }
-        .get("/versions") {
-            TODO("kotlin versions")
-        }
+        .get("/versions", DefaultCoroutinesHandler(versionHandler))
 
     val articleRouting = RoutingHandler()
         .get("/{id}") {

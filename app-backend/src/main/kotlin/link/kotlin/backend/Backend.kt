@@ -10,20 +10,28 @@ import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
 import io.github.config4k.extract
 import io.undertow.Undertow
+import link.kotlin.backend.handlers.VersionHandler
+import link.kotlin.backend.jobs.KotlinVersionFetcher
+import link.kotlin.backend.jobs.MavenKotlinVersionFetcher
 import link.kotlin.backend.services.createHttpClient
+import link.kotlin.backend.services.createXmlMapper
 import org.koin.logger.slf4jLogger
 import org.koin.core.KoinApplication
 import org.koin.dsl.module
+import org.koin.experimental.builder.single
+import org.koin.experimental.builder.singleBy
 import kotlin.concurrent.thread
 
 fun main() {
     val mainModule = module {
         single { ObjectMapper().registerKotlinModule() }
-        single { XmlMapper().also { it.registerKotlinModule() } }
+        single { createXmlMapper() }
         single { createHttpClient() }
         single { ConfigFactory.load().resolve() }
         single { get<Config>().extract<ApplicationConfiguration>() }
-        single { createRootHandler() }
+        single { createRootHandler(get()) }
+        single<VersionHandler>()
+        singleBy<KotlinVersionFetcher, MavenKotlinVersionFetcher>()
     }
 
     val koin = KoinApplication.init().run {
